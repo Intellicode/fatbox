@@ -1,0 +1,17 @@
+---
+- name: Provision Digital Ocean
+  hosts: local
+  tasks:
+    - name: DO - ensure ssh key exists
+      user: >
+        name={{ ansible_user_id }}
+        generate_ssh_key=yes
+        ssh_key_file=.ssh/id_rsa
+    - name: DO - ensure key exists at DigitalOcean
+      digital_ocean: >
+        state=present
+        command=ssh
+        name=ansible_ssh_key
+        ssh_pub_key={{ lookup('file', '~/.ssh/id_rsa.pub') }}
+      register: ansible_ssh_key
+    - include: tasks/main.yml item=fatbox group_public=fatbox group_private=fatbox-private os=ubuntu-16-04-x64 cloud_config=cloud-config
