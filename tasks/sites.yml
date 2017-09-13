@@ -1,0 +1,35 @@
+- set_fact:
+    domain: test.nginx.nl
+
+- name: Remove default site
+  become: true
+  file: path=/etc/nginx/sites-enabled/default state=absent
+
+- name: add dir
+  become: true
+  file: name=/var/www/{{domain}}
+        state=directory owner=www-data group=www-data
+
+- name: Add site
+  become: true
+  template: src=templates/nginx.site.conf.j2
+            dest=/etc/nginx/sites-available/{{domain}}
+
+- name: Activate the site
+  become: true
+  file: src=/etc/nginx/sites-available/{{domain}}
+        dest=/etc/nginx/sites-enabled/{{domain}}
+        state=link
+
+- name: Cert
+  become: true
+  shell: certbot --nginx --agree-tos --no-eff-email --email tom@intellicode.nl -d {{domain}} -n
+
+- name: Add site with ssl 
+  become: true
+  template: src=templates/nginx_ssl.site.conf.j2
+            dest=/etc/nginx/sites-available/{{domain}}
+
+- name: reload nginx
+  become: true
+  service: name=nginx state=reloaded

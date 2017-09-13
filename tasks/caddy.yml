@@ -1,0 +1,42 @@
+- name: Caddy install script
+  template: src=templates/install_caddy.sh.j2 dest=/home/ansible/install_caddy.sh
+- name: Install caddy
+  become: true
+  shell: cat install_caddy.sh | /bin/bash -s http.cache
+- name: Add group
+  become: true
+  group:
+    name: www-data
+    state: present
+- name: create user
+  become: true
+  user:
+    name: www-data
+    uid: 33
+    group: www-data
+    shell: /usr/sbin/nologin
+    home: /var/www
+    system: yes
+- name: Create tarconfget directory
+  become: true
+  file: path=/etc/caddy state=directory mode=0755 owner=root group=www-data
+- name: Create ssl directory
+  become: true
+  file: path=/etc/ssl/caddy state=directory mode=0770 owner=www-data group=root
+- name: Create www directory
+  become: true
+  file: path=/var/www state=directory mode=0555 owner=www-data group=www-data
+- name: Create www/test directory
+  become: true
+  file: path=/var/www/test state=directory mode=0555 owner=www-data group=www-data
+
+- name: Caddy service
+  become: true
+  template: src=templates/caddy.service.j2 dest=/etc/systemd/system/caddy.service mode=0644
+
+- name: Caddy service
+  become: true
+  template: src=templates/Caddyfile.j2 dest=/etc/caddy/Caddyfile mode=0444 owner=www-data group=www-data
+- name: restarted
+  become: true
+  service: name=caddy state=restarted daemon_reload=yes enabled=yes

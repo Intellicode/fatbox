@@ -1,0 +1,16 @@
+- name: Install ufw
+  become: true
+  become_method: sudo
+  apt: name=ufw update_cache=yes state=present
+- name: Allow ssh
+  become: true
+  ufw: rule=limit port=22 proto=tcp log=yes
+- name: Allow http
+  become: true
+  ufw: rule=limit port=80 proto=tcp
+- name: Allow ssh
+  become: true
+  ufw: rule=limit port=443 proto=tcp
+- name: Reject by default
+  become: true
+  ufw: state=enabled policy=deny

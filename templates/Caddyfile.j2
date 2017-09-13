@@ -1,0 +1,9 @@
+test.nginx.nl {
+  root /var/www/test
+  gzip
+  fastcgi / unix:/run/php/php7.0-fpm.sock php
+  rewrite {
+    if {path} not_match ^\/wp-admin
+    to {path} {path}/ /index.php?{query}
+  }
+}

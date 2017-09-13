@@ -1,0 +1,12 @@
+- name: Install software properties
+  become: true
+  apt: name=software-properties-common
+- name: Add repository key to the system
+  become: true
+  apt_key: keyserver=keyserver.ubuntu.com id=0xF1656F24C74CD1D8
+- name: Install MariaDB repository
+  become: true
+  apt_repository: repo='deb [arch=amd64,i386] http://ams2.mirrors.digitalocean.com/mariadb/repo/10.1/ubuntu xenial main' state=present
+- name: Install MariaDB Server
+  become: true
+  apt: name=mariadb-server state=latest update_cache=yes

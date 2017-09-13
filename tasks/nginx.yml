@@ -1,0 +1,5 @@
+- name: install certbot dependencies
+  become: true
+  apt: name={{item}} state=present
+  with_items:
+    -  nginx

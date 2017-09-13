@@ -1,0 +1,34 @@
+- name: Download install script Dokku
+  get_url:
+    url: https://raw.githubusercontent.com/dokku/dokku/v0.10.3/bootstrap.sh
+    dest: /home/ansible/bootstrap.sh
+- name: Check Dokku
+  shell: dokku version
+  register: current_version
+  ignore_errors: yes
+- name: Install Dokku
+  become: true
+  become_method: sudo
+  environment:
+    DOKKU_TAG: v0.10.3
+  shell: >
+    bash /home/ansible/bootstrap.sh 
+  when: current_version.stdout!="0.10.3"
+- name: Install let's encrypt
+  become: true
+  become_method: sudo
+  shell: >
+     dokku plugin:list | grep "letsencrypt" || dokku plugin:install https://github.com/dokku/dokku-letsencrypt.git
+  ignore_errors: yes
+- name: Install Mongo
+  become: true
+  become_method: sudo
+  shell: >
+     dokku plugin:list | grep "mongo" || dokku plugin:install https://github.com/dokku/dokku-mongo.git mongo
+  ignore_errors: yes
+- name: Install Redis
+  become: true
+  become_method: sudo
+  shell: >
+    dokku plugin:list | grep "redis" || dokku plugin:install https://github.com/dokku/dokku-redis.git redis
+  ignore_errors: yes

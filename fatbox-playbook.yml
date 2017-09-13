@@ -15,3 +15,33 @@
         ssh_pub_key={{ lookup('file', '~/.ssh/id_rsa.pub') }}
       register: ansible_ssh_key
     - include: tasks/main.yml item=fatbox group_public=fatbox group_private=fatbox-private os=ubuntu-16-04-x64 cloud_config=cloud-config
+- name: Configure python
+  hosts: fatbox
+  user: ansible
+  gather_facts: False
+  tasks:
+    - include: tasks/python.yml
+- name: auto updates
+  hosts: fatbox
+  user: ansible
+  become: true
+  roles:
+  - role: jnv.unattended-upgrades
+    unattended_origins_patterns:
+    - 'origin=Ubuntu,archive=${distro_codename}-security'
+    - 'o=Ubuntu,a=${distro_codename}-updates'
+    unattended_package_blacklist: [vim]
+- name: Configure common functions
+  hosts: fatbox
+  user: ansible
+  tasks:
+    #- include: tasks/firewall.yml
+    #- include: tasks/do-agent.yml
+    #- include: tasks/mariadb.yml
+    #- include: tasks/nginx.yml
+    #- include: tasks/certbot.yml
+    #- include: tasks/caddy.yml
+    #- include: tasks/php.yml
+    - include: tasks/sites.yml
+# - include: tasks/dokku.yml
+# - include: tasks/phantomjs.yml

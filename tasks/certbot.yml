@@ -1,0 +1,22 @@
+- name: install certbot dependencies
+  become: true
+  apt: name={{item}} state=present
+  with_items:
+    -  software-properties-common
+- name: add hub-binary for github remoting
+  become: true
+  apt_repository: repo='ppa:certbot/certbot'
+- name: update apt cache
+  become: true
+  apt: update_cache=yes cache_valid_time=3600
+- name: install certbot
+  become: true
+  apt: name={{item}} state=present
+  with_items:
+    - python-certbot-nginx 
+- name: Add crontab to renew certificates
+  become: true
+  cron: minute="30" hour="2" weekday="1" job="/usr/bin/certbot renew >> /var/log/le-renew.log"
+- name: Add crontab to reload server
+  become: true
+  cron: minute="35" hour="2" weekday="1" job="/etc/init.d/nginx reload"
